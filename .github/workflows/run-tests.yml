@@ -10,7 +10,6 @@ env:
 
 jobs:
   test:
-    needs: [clippy-lint, yarn-lint]
     runs-on: ubuntu-latest
 
     steps:
