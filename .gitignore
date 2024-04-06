@@ -1,0 +1,10 @@
+.idea
+.anchor
+.bolt
+.DS_Store
+target
+!target/deploy/
+**/*.rs.bk
+node_modules
+test-ledger
+.yarn

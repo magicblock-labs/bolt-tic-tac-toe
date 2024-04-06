@@ -1,0 +1,24 @@
+[package]
+name = "play"
+version = "0.1.1"
+description = "Created with Bolt"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "play"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+idl-build = ["anchor-lang/idl-build"]
+
+[dependencies]
+bolt-lang = { path = "/Users/gabrielepicco/Documents/Solana/bolt/crates/bolt-lang" }
+anchor-lang = { git = "https://github.com/coral-xyz/anchor.git", rev = "0f60909" }
+serde = { version = "1.0.130", features = ["derive"] }
+players = { version = "0.1.1", path = "../../components/players", features = ["cpi"] }
+grid = { version = "0.1.1", path = "../../components/grid", features = ["cpi"] }
