@@ -17,6 +17,10 @@
 
 </div>
 
+## 🕹️Live Demo
+
+[Click here](https://tic-tac-toe-bolt.netlify.app) to play the game.
+
 ## 🚀 Getting Started
 
 ### Npm

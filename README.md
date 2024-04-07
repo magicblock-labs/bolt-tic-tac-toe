@@ -52,3 +52,7 @@ Inside this repository, you'll find an example React client implementing the Tic
 Location: The React Tic-Tac-Toe client can be found in the [`app/react-tic-tac-toe`](app/react-tic-tac-toe) directory.
 
 Features: This example showcases basic gameplay functionalities, including a graphical user interface for playing Tic-Tac-Toe, interaction with the Bolt program for game logic, and a template for further customization.
+
+## 🕹️Live Demo
+
+[Click here](https://tic-tac-toe-bolt.netlify.app) to play the game.
