@@ -56,3 +56,5 @@ Features: This example showcases basic gameplay functionalities, including a gra
 ## 🕹️Live Demo
 
 [Click here](https://tic-tac-toe-bolt.netlify.app) to play the game.
+
+Demo is on DevNet, change your wallet network to DevNet to play the game.
