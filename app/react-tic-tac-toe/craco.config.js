@@ -16,6 +16,11 @@ module.exports = {
                 vm: false,
             };
 
+            webpackConfig.output = {
+                ...webpackConfig.output,
+                publicPath: '/',
+            };
+
             // Add Buffer global if it's missing
             webpackConfig.plugins = (webpackConfig.plugins || []).concat(
                 new webpack.ProvidePlugin({
