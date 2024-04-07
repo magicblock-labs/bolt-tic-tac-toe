@@ -1,10 +1,26 @@
 .idea
 .anchor
 .bolt
-.DS_Store
+*.DS_Store
 target
 !target/deploy/
 **/*.rs.bk
 node_modules
 test-ledger
 .yarn
+node_modules
+
+# React .gitingore
+app/react-tic-tac-toe/node_modules
+app/react-tic-tac-toe/.pnp
+app/react-tic-tac-toe/react-tic-tac-toe/.pnp.js
+app/react-tic-tac-toe/coverage
+app/react-tic-tac-toe/build
+app/react-tic-tac-toe/.env.local
+app/react-tic-tac-toe/.env.development.local
+app/react-tic-tac-toe/.env.test.local
+app/react-tic-tac-toe/.env.production.local
+app/react-tic-tac-toe/npm-debug.log*
+app/react-tic-tac-toe/yarn-debug.log*
+app/react-tic-tac-toe/yarn-error.log*
+app/react-tic-tac-toe/.idea
