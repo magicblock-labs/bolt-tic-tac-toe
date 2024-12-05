@@ -1,7 +1,7 @@
 use bolt_lang::*;
 use players::Players;
 
-declare_id!("2umhnxiCtmg5KTn4L9BLo24uLjb74gAh4tmpMLRKYndN");
+declare_id!("7TsTc97MB21EKbh2RetcWsGWRJ4xuMkPKKD4DcMJ2Sms");
 
 #[error_code]
 pub enum PlayersError {
