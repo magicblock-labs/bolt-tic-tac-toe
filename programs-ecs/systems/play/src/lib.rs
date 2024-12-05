@@ -2,7 +2,7 @@ use bolt_lang::*;
 use grid::Grid;
 use players::Players;
 
-declare_id!("DyUy1naq1kb3r7HYBrTf7YhnGMJ5k5NqS3Mhk65GfSih");
+declare_id!("EFLfG5icLgcUYwuSnuScoYptcrgh8WYLHx33M4wvTPFv");
 
 #[error_code]
 pub enum TicTacToeError {

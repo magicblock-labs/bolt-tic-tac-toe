@@ -3,7 +3,7 @@
 .bolt
 *.DS_Store
 target
-!target/deploy/
+target/deploy/*.so
 **/*.rs.bk
 node_modules
 test-ledger

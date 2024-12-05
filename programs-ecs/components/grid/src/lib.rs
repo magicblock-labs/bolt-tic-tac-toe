@@ -1,6 +1,6 @@
 use bolt_lang::*;
 
-declare_id!("rdiVoU6KomhXBDMLi6UXVHvmjEUtKqb5iDCWChxMzZ7");
+declare_id!("9EoKMqQqrgRAxVED34q17e466RKme5sTUkuCqUGH4bij");
 
 #[component]
 pub struct Grid {

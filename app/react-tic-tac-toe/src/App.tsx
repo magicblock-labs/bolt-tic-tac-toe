@@ -5,33 +5,34 @@ import Square from "./components/Square";
 import {
     AddEntity,
     ApplySystem,
-    createApplySystemInstruction,
-    createInitializeComponentInstruction,
     FindComponentPda,
-    FindWorldPda
+    FindWorldPda,
+    InitializeComponent,
+    anchor,
 } from "@magicblock-labs/bolt-sdk";
 import {WalletNotConnectedError} from '@solana/wallet-adapter-base';
 import {useConnection, useWallet} from '@solana/wallet-adapter-react';
 import {WalletMultiButton} from "@solana/wallet-adapter-react-ui";
 import Alert from "./components/Alert";
 import {AccountInfo, PublicKey, Transaction} from "@solana/web3.js";
-import {Program, Provider} from "@coral-xyz/anchor";
+import {BN, Program, Provider} from "@coral-xyz/anchor";
 import {SimpleProvider} from "./components/Wallet";
 import Active from "./components/Active";
 
-const WORLD_INSTANCE_ID = 4;
+const WORLD_INSTANCE_ID = 1721;
 
 // Components
-const GRID_COMPONENT = new PublicKey("rdiVoU6KomhXBDMLi6UXVHvmjEUtKqb5iDCWChxMzZ7");
-const PLAYERS_COMPONENT = new PublicKey("5Xz6iiE2FZdpqrvCKbGqDajNYt1tP8cRGXrq3THSFo1q");
+const GRID_COMPONENT = new PublicKey("9EoKMqQqrgRAxVED34q17e466RKme5sTUkuCqUGH4bij");
+const PLAYERS_COMPONENT = new PublicKey("HLzXXTbMUjemRSQr5LHjtZgBvqyieuhY8wE29xYzhZSX");
 
 // Systems
-const JOIN_GAME = new PublicKey("2umhnxiCtmg5KTn4L9BLo24uLjb74gAh4tmpMLRKYndN");
-const PLAY = new PublicKey("DyUy1naq1kb3r7HYBrTf7YhnGMJ5k5NqS3Mhk65GfSih");
+const JOIN_GAME = new PublicKey("7TsTc97MB21EKbh2RetcWsGWRJ4xuMkPKKD4DcMJ2Sms");
+const PLAY = new PublicKey("EFLfG5icLgcUYwuSnuScoYptcrgh8WYLHx33M4wvTPFv");
 
 const App: React.FC = () => {
     let { connection } = useConnection();
     const provider = useRef<Provider>(new SimpleProvider(connection));
+    anchor.setProvider(provider.current);
     const { publicKey, sendTransaction } = useWallet();
     const [squares, setSquares] = useState<string[]>(Array(9).fill(""));
     const [turn, setTurn] = useState<"x" | "o">("x");
@@ -56,7 +57,7 @@ const App: React.FC = () => {
         const idl = await Program.fetchIdl(component, provider.current);
         if (!idl) throw new Error('IDL not found');
         // Initialize the program with the dynamically fetched IDL
-        return new Program(idl, component, provider.current);
+        return new Program(idl, provider.current);
     }, [provider]);
 
     // Initialize the components clients to access the parsed account data
@@ -133,13 +134,13 @@ const App: React.FC = () => {
 
     // Define callbacks function to handle account changes
     const handlePlayersComponentChange = useCallback((accountInfo: AccountInfo<Buffer>) => {
-        const parsedData = playersComponentClient.current?.coder.accounts.decode("Players", accountInfo.data);
+        const parsedData = playersComponentClient.current?.coder.accounts.decode("players", accountInfo.data);
         updatePlayersComponent(parsedData);
     }, [updatePlayersComponent]);
 
 
     const handleGridComponentChange = useCallback((accountInfo: AccountInfo<Buffer>) => {
-        const parsedData = gridComponentClient.current?.coder.accounts.decode("Grid", accountInfo.data);
+        const parsedData = gridComponentClient.current?.coder.accounts.decode("grid", accountInfo.data);
         updateGridComponent(parsedData);
     }, [updateGridComponent]);
 
@@ -153,14 +154,16 @@ const App: React.FC = () => {
         if (gridComponentSubscriptionId && gridComponentSubscriptionId.current) await connection.removeAccountChangeListener(gridComponentSubscriptionId.current);
 
         // Subscribe to players changes
-        const playersComponent = FindComponentPda(PLAYERS_COMPONENT, entityMatch.current);
+        const playersComponent = FindComponentPda({ componentId: PLAYERS_COMPONENT, entity: entityMatch.current });
         playersComponentSubscriptionId.current = connection.onAccountChange(playersComponent, handlePlayersComponentChange, 'processed');
 
         // Subscribe to grid changes
-        const gridComponent = FindComponentPda(GRID_COMPONENT, entityMatch.current);
+        const gridComponent = FindComponentPda({ componentId: GRID_COMPONENT, entity: entityMatch.current });
         gridComponentSubscriptionId.current = connection.onAccountChange(gridComponent, handleGridComponentChange, 'processed');
 
+        // @ts-ignore
         playersComponentClient.current?.account.players.fetch(playersComponent, "processed").then(updatePlayersComponent);
+        // @ts-ignore
         gridComponentClient.current?.account.grid.fetch(gridComponent, "processed").then(updateGridComponent);
     }, [connection, handlePlayersComponentChange, handleGridComponentChange, updatePlayersComponent, updateGridComponent]);
 
@@ -200,8 +203,8 @@ const App: React.FC = () => {
                 context: { slot: minContextSlot },
                 value: { blockhash, lastValidBlockHeight }
             } = await connection.getLatestBlockhashAndContext();
-
             const signature = await sendTransaction(transaction, connection, { minContextSlot});
+            console.log("Signature", signature);
             await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature }, "processed");
 
             // Transaction was successful
@@ -221,8 +224,8 @@ const App: React.FC = () => {
      */
     const newGameTx = useCallback(async () => {
         if (!publicKey) throw new WalletNotConnectedError();
-        const worldPda = FindWorldPda(WORLD_INSTANCE_ID);
-
+        const worldPda = FindWorldPda({ worldId: new BN(WORLD_INSTANCE_ID) });
+     
         // Create the entity
         const addEntity = await AddEntity({
             payer: publicKey,
@@ -234,32 +237,38 @@ const App: React.FC = () => {
         gameId.current = addEntity.entityPda;
 
         // Initialize the grid component
-        const initGridIx = createInitializeComponentInstruction({
+        const initGridIx = (await InitializeComponent({
             payer: publicKey,
-            entity: addEntity.entityPda,
-            componentProgram: GRID_COMPONENT,
-        });
+            entity: entityMatch.current,
+            componentId: GRID_COMPONENT,
+        })).instruction;
 
         // Initialize the player component
-        const initPlayersIx = createInitializeComponentInstruction({
+        const initPlayersIx = (await InitializeComponent({
             payer: publicKey,
             entity: addEntity.entityPda,
-            componentProgram: PLAYERS_COMPONENT,
-        });
+            componentId: PLAYERS_COMPONENT,
+        })).instruction;
 
         // Join the game
-        const joinGame = createApplySystemInstruction({
-            entity: addEntity.entityPda,
-            components: [PLAYERS_COMPONENT],
-            system: JOIN_GAME,
+        const joinGame = (await ApplySystem({
             authority: publicKey,
-        });
+            systemId: JOIN_GAME,
+            world: worldPda,
+            entities: [
+                {
+                    entity: addEntity.entityPda,
+                    components: [{ componentId: PLAYERS_COMPONENT }]
+                }
+            ]
+        })).instruction;
 
         transaction.add(initGridIx);
         transaction.add(initPlayersIx);
         transaction.add(joinGame);
 
         const signature = await submitTransaction(transaction);
+        console.log("Signature", signature);
         if (signature != null) {
             await subscribeToGame();
         }
@@ -272,12 +281,18 @@ const App: React.FC = () => {
         if (!publicKey) throw new WalletNotConnectedError();
         if (gameId.current == null) setTransactionError("Enter a game ID");
         const entity = gameId.current as PublicKey;
+        const worldPda = FindWorldPda({ worldId: new BN(WORLD_INSTANCE_ID) });
 
         const applySystem = await ApplySystem({
             authority: publicKey,
-            system: JOIN_GAME,
-            entity,
-            components: [PLAYERS_COMPONENT],
+            systemId: JOIN_GAME,
+            world: worldPda,
+            entities: [
+                {
+                    entity,
+                    components: [{ componentId: PLAYERS_COMPONENT }]
+                }
+            ]
         });
         const transaction = applySystem.transaction;
         entityMatch.current = gameId.current;
@@ -299,12 +314,18 @@ const App: React.FC = () => {
             setTransactionError("Create or join a game first");
             return;
         }
+        const worldPda = FindWorldPda({ worldId: new BN(WORLD_INSTANCE_ID) });
         // Make a move
         const makeMove = await ApplySystem({
             authority: publicKey,
-            system: PLAY,
-            entity: entityMatch.current,
-            components: [GRID_COMPONENT, PLAYERS_COMPONENT],
+            systemId: PLAY,
+            world: worldPda,
+            entities: [
+                {
+                    entity: entityMatch.current,
+                    components: [{ componentId: GRID_COMPONENT }, { componentId: PLAYERS_COMPONENT }]
+                }
+            ],
             args: {
                 row: row,
                 column: column

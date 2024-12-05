@@ -5,11 +5,25 @@ members = [
 ]
 resolver = "2"
 
+[workspace.dependencies]
+players = { path = "programs-ecs/components/players", features = ["cpi"] }
+grid = { path = "programs-ecs/components/grid", features = ["cpi"] }
+bolt-lang = "0.1.11"
+anchor-lang = "0.30.1"
+
 [profile.release]
 overflow-checks = true
 lto = "fat"
 codegen-units = 1
+
 [profile.release.build-override]
 opt-level = 3
 incremental = false
 codegen-units = 1
+
+[patch.crates-io]
+# Uncomment this to use the latest in-development version of Bolt
+# bolt-lang = { git = "https://github.com/magicblock-labs/bolt.git", branch = "main" }
+
+# Uncomment this to use a local version of Bolt for development (bolt must be cloned above the current directory)
+# bolt-lang = { path = "../bolt/crates/bolt-lang"}

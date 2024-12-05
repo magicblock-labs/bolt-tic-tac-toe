@@ -5,23 +5,23 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-grid = "rdiVoU6KomhXBDMLi6UXVHvmjEUtKqb5iDCWChxMzZ7"
-players = "5Xz6iiE2FZdpqrvCKbGqDajNYt1tP8cRGXrq3THSFo1q"
-join-game = "2umhnxiCtmg5KTn4L9BLo24uLjb74gAh4tmpMLRKYndN"
-play = "DyUy1naq1kb3r7HYBrTf7YhnGMJ5k5NqS3Mhk65GfSih"
+grid = "9EoKMqQqrgRAxVED34q17e466RKme5sTUkuCqUGH4bij"
+join-game = "7TsTc97MB21EKbh2RetcWsGWRJ4xuMkPKKD4DcMJ2Sms"
+play = "EFLfG5icLgcUYwuSnuScoYptcrgh8WYLHx33M4wvTPFv"
+players = "HLzXXTbMUjemRSQr5LHjtZgBvqyieuhY8wE29xYzhZSX"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [workspace]
 members = ["programs-ecs/components/*", "programs-ecs/systems/*"]
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+test = "sleep 5 && yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
 
 [test]
 startup_wait = 5000
