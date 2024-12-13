@@ -72,7 +72,7 @@ describe("tic-tac-toe", () => {
     const txSign = await provider.sendAndConfirm(initializeComponent.transaction);
     console.log(`Initialized the grid component. Initialization signature: ${txSign}`);
   });
-  it("Join the game", async () => {
+  it("Player 1 joins the game", async () => {
     const joinGame = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: joinGameSystem.programId,
@@ -84,6 +84,24 @@ describe("tic-tac-toe", () => {
     });
     const txSign = await provider.sendAndConfirm(joinGame.transaction);
     console.log(`Player 1 joined the game. Signature: ${txSign}`);
+  });
+  it("Player 1 cannot join the game again", async () => {
+    const joinGame = await ApplySystem({
+      authority: provider.wallet.publicKey,
+      systemId: joinGameSystem.programId,
+      world: worldPda,
+      entities: [{
+        entity: matchEntityPda,
+        components: [{ componentId: playersComponent.programId }]
+      }]
+    });
+    try {
+      const txSign = await provider.sendAndConfirm(joinGame.transaction);
+      console.log(`Player 1 joined the game. Signature: ${txSign}`);
+      assert.fail("Expected transaction to fail but it succeeded");
+    } catch (error) {
+      assert.isTrue(error.toString().includes("Error Message: Player already joined."));
+    }
   });
   it("Player 2 joins the game", async () => {
     const joinGame = await ApplySystem({
@@ -134,7 +152,7 @@ describe("tic-tac-toe", () => {
       console.log(`Player 2 made an invalid move. Signature: ${txSign}`);
       assert.fail("Expected transaction to fail but it succeeded");
     } catch (error) {
-      console.log(`Player 2 made an invalid move. Error: ${error}`);
+      assert.isTrue(error.toString().includes("Error Message: Tile already set."));
     }
   });
   it("Player 2 makes a move", async () => {
@@ -199,7 +217,7 @@ describe("tic-tac-toe", () => {
       console.log(`Player 1 made a move. Signature: ${txSign}`);
       assert.fail("Expected transaction to fail but it succeeded");
     } catch (error) {
-      console.log(`Player 1 made an invalid move. Error: ${error}`);
+      assert.isTrue(error.toString().includes("Error Message: Game is not active."));
     }
   });
 
