@@ -430,9 +430,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-arguments"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dfe1806d837c10d43d7e7027bbfe4e44ec58b116cad99852cba62122a0aa26da"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -441,9 +439,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-component"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a1c8e4194186c4de87d48264fa21319dc14136163fadf45a971d6648785246d"
+version = "0.1.12"
 dependencies = [
  "bolt-utils",
  "proc-macro2",
@@ -453,9 +449,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-component-deserialize"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68209abb1ad4369228a3328f258cc194ac4c86ead90ca6684671ee379837f4d9"
+version = "0.1.12"
 dependencies = [
  "bolt-utils",
  "proc-macro2",
@@ -465,9 +459,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-component-id"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ebaa0a871738933615a12919cc4e8c909f6bbb1a683e71e9ac56aa18d3a31a79"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -476,9 +468,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-delegate"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81c42a4f5b9ff89aabc323697041109bd1ed39dcb077c91c76042c4dda386e69"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -487,9 +477,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-extra-accounts"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "816f4785b91d94fabfda1dd79b4073fd37437247d1f641e338c347db2402f3b0"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -498,9 +486,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-program"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7c7b19d2ac712a304422f5bc25b8b5d91559f3a31bfdfffe79ce41b3d4feac79"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -509,9 +495,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-system"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "524fd2651ac44a654c976408d8ca40bd6317c4774ee239edac9fc3955e5e9710"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -520,9 +504,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-attribute-bolt-system-input"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "040a94416c9938ed4230d9453d4f2b77a4e77d9df76f815e7cd908a2463a1806"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -531,9 +513,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-component"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ab43c051c5f38a441f3836469a67803f077abda6f6066afc839719954a3ec03"
+version = "0.1.12"
 dependencies = [
  "anchor-lang",
  "bolt-system",
@@ -541,9 +521,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-helpers-system-template"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94de6ca9089ded7448ab4756551fef04db5570e820db3f87d616fccc164cd10f"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -552,9 +530,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-helpers-world-apply"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68ed2ffa47a7db26cc6687c6ba4a45cdb0ccfeba58f33d0c24f78c1d57a078cc"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -563,9 +539,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-lang"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "02432b8704bbd93361b88713ee80cb3fd7897fee49cb6ae57c9700b0050402a9"
+version = "0.1.12"
 dependencies = [
  "ahash 0.8.11",
  "anchor-lang",
@@ -587,9 +561,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-system"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d230e37cf192dbd451132ce432c1bb85f3a9765481054d4ddcaa9b3984a7c748"
+version = "0.1.12"
 dependencies = [
  "anchor-lang",
  "bolt-helpers-system-template",
@@ -597,9 +569,7 @@ dependencies = [
 
 [[package]]
 name = "bolt-utils"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d6da2d445dca2d1b4bf5f744da4e59a4420b9b5126c1c1579c0175c5a0190ba3"
+version = "0.1.12"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -788,9 +758,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.2.2"
+version = "1.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f34d93e62b03caf570cccc334cbc6c2fceca82f39211051345108adcba3eebdc"
+checksum = "9157bbaa6b165880c27a4293a474c91cdcf265cc68cc829bf10be0964a391caf"
 dependencies = [
  "jobserver",
  "libc",
@@ -1035,7 +1005,6 @@ dependencies = [
 name = "grid"
 version = "0.1.10"
 dependencies = [
- "anchor-lang",
  "bolt-lang",
 ]
 
@@ -1147,7 +1116,6 @@ dependencies = [
 name = "join-game"
 version = "0.1.10"
 dependencies = [
- "anchor-lang",
  "bolt-lang",
  "players",
  "serde",
@@ -1155,9 +1123,9 @@ dependencies = [
 
 [[package]]
 name = "js-sys"
-version = "0.3.74"
+version = "0.3.76"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a865e038f7f6ed956f788f0d7d60c541fff74c7bd74272c5d4cf15c63743e705"
+checksum = "6717b6b5b077764fb5966237269cb3c64edddde4b14ce42647430a78ced9e7b7"
 dependencies = [
  "once_cell",
  "wasm-bindgen",
@@ -1180,9 +1148,9 @@ checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
 name = "libc"
-version = "0.2.167"
+version = "0.2.168"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09d6582e104315a817dff97f75133544b2e094ee22447d2acf4a74e189ba06fc"
+checksum = "5aaeb2981e0606ca11d79718f8bb01164f1d6ed75080182d3abf017e6d244b6d"
 
 [[package]]
 name = "libsecp256k1"
@@ -1377,7 +1345,6 @@ dependencies = [
 name = "play"
 version = "0.1.10"
 dependencies = [
- "anchor-lang",
  "bolt-lang",
  "grid",
  "players",
@@ -1388,7 +1355,6 @@ dependencies = [
 name = "players"
 version = "0.1.10"
 dependencies = [
- "anchor-lang",
  "bolt-lang",
 ]
 
@@ -1539,9 +1505,9 @@ dependencies = [
 
 [[package]]
 name = "redox_syscall"
-version = "0.5.7"
+version = "0.5.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9b6dfecf2c74bce2466cabf93f6664d6998a69eb21e39f4207930065b27b771f"
+checksum = "03a862b389f93e68874fbf580b9de08dd02facb9a788ebadaf4a3fd33cf58834"
 dependencies = [
  "bitflags",
 ]
@@ -1610,15 +1576,15 @@ checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
 name = "semver"
-version = "1.0.23"
+version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61697e0a1c7e512e84a621326239844a24d8207b4669b41bc18b32ea5cbf988b"
+checksum = "3cb6eb87a131f756572d7fb904f6e7b68633f09cca868c5df1c4b8d1a694bbba"
 
 [[package]]
 name = "serde"
-version = "1.0.215"
+version = "1.0.216"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6513c1ad0b11a9376da888e3e0baa0077f1aed55c17f50e7b2397136129fb88f"
+checksum = "0b9781016e935a97e8beecf0c933758c97a5520d32930e460142b4cd80c6338e"
 dependencies = [
  "serde_derive",
 ]
@@ -1634,9 +1600,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.215"
+version = "1.0.216"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ad1e866f866923f252f05c889987993144fb74e722403468a4ebd70c3cd756c0"
+checksum = "46f859dbbf73865c6627ed570e78961cd3ac92407a2d117204c49232485da55e"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2009,9 +1975,9 @@ checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
 name = "wasm-bindgen"
-version = "0.2.97"
+version = "0.2.99"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d15e63b4482863c109d70a7b8706c1e364eb6ea449b201a76c5b89cedcec2d5c"
+checksum = "a474f6281d1d70c17ae7aa6a613c87fce69a127e2624002df63dcb39d6cf6396"
 dependencies = [
  "cfg-if",
  "once_cell",
@@ -2020,13 +1986,12 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-backend"
-version = "0.2.97"
+version = "0.2.99"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d36ef12e3aaca16ddd3f67922bc63e48e953f126de60bd33ccc0101ef9998cd"
+checksum = "5f89bb38646b4f81674e8f5c3fb81b562be1fd936d84320f3264486418519c79"
 dependencies = [
  "bumpalo",
  "log",
- "once_cell",
  "proc-macro2",
  "quote",
  "syn 2.0.90",
@@ -2035,9 +2000,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-macro"
-version = "0.2.97"
+version = "0.2.99"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "705440e08b42d3e4b36de7d66c944be628d579796b8090bfa3471478a2260051"
+checksum = "2cc6181fd9a7492eef6fef1f33961e3695e4579b9872a6f7c83aee556666d4fe"
 dependencies = [
  "quote",
  "wasm-bindgen-macro-support",
@@ -2045,9 +2010,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-macro-support"
-version = "0.2.97"
+version = "0.2.99"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98c9ae5a76e46f4deecd0f0255cc223cfa18dc9b261213b8aa0c7b36f61b3f1d"
+checksum = "30d7a95b763d3c45903ed6c81f156801839e5ee968bb07e534c44df0fcd330c2"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2058,15 +2023,15 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-shared"
-version = "0.2.97"
+version = "0.2.99"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ee99da9c5ba11bd675621338ef6fa52296b76b83305e9b6e5c77d4c286d6d49"
+checksum = "943aab3fdaaa029a6e0271b35ea10b72b943135afe9bffca82384098ad0e06a6"
 
 [[package]]
 name = "web-sys"
-version = "0.3.74"
+version = "0.3.76"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a98bc3c33f0fe7e59ad7cd041b89034fa82a7c2d4365ca538dda6cdaf513863c"
+checksum = "04dd7223427d52553d3702c004d3b2fe07c148165faa56313cb00211e31c12bc"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
@@ -2147,9 +2112,7 @@ dependencies = [
 
 [[package]]
 name = "world"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e4da87e5c0b36db08ca2141fa9158b040332f2fcd4f14c904fd288fc61232c78"
+version = "0.1.12"
 dependencies = [
  "anchor-lang",
  "bolt-component",

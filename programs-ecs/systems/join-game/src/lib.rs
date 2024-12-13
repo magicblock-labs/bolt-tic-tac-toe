@@ -15,14 +15,14 @@ pub enum PlayersError {
 pub mod join_game {
 
     pub fn execute(ctx: Context<Components>, _args_p: Vec<u8>) -> Result<Components> {
-        for player in &mut ctx.accounts.players.players {
+        for (index, player) in ctx.accounts.players.players.into_iter().enumerate() {
             if let Some(player) = player {
-                if *player == *ctx.accounts.authority.key {
+                if player == *ctx.accounts.authority.key {
                     return Err(PlayersError::PlayerAlreadyJoined.into());
                 }
             } else {
-                *player = Some(*ctx.accounts.authority.key);
-                return ctx.accounts.try_to_vec(); // FIXME: #[system] transforms the return type to a (Vec<u8>,). Even though we can return Ok(ctx.accounts) at the end of the function, it doesn't compile if we attempt to "return Ok(ctx.accounts)" at any other point.
+                ctx.accounts.players.players[index] = Some(*ctx.accounts.authority.key);
+                return Ok(ctx.accounts);
             }
         }
         Err(PlayersError::GameFull.into())

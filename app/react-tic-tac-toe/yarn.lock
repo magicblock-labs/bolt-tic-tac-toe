@@ -2036,8 +2036,10 @@
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.5.tgz#4fc56c15c580b9adb7dc3c333a134e540b44bfb1"
   integrity sha512-Vo+PSpZG2/fmgmiNzYK9qWRh8h/CHrwD0mo1h1DzL4yzHNSfWYujGTYsWGreD000gcgmZ7K4Ys6Tx9TxtsKdDw==
 
-"@magicblock-labs/bolt-sdk@file:../../../bolt/clients/bolt-sdk":
-  version "0.1.10"
+"@magicblock-labs/bolt-sdk@^0.1.11":
+  version "0.1.12"
+  resolved "https://registry.yarnpkg.com/@magicblock-labs/bolt-sdk/-/bolt-sdk-0.1.12.tgz#e4f2a6be1bb36db5d1691ac6bcbbbe23c96de361"
+  integrity sha512-/ysdZ/4ib6xMwE0mcKifV3/vGSzDDHh5uUxdFOZyoXQcC6Qpl3U0b8r3uAJXhvmBsOgSg8fBMhDKYGheDbvyjQ==
   dependencies:
     "@coral-xyz/anchor" "^0.30.1"
     "@magicblock-labs/ephemeral-rollups-sdk" "0.0.6"
