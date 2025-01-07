@@ -8,6 +8,8 @@ resolver = "2"
 [workspace.dependencies]
 players = { path = "programs-ecs/components/players", features = ["cpi"] }
 grid = { path = "programs-ecs/components/grid", features = ["cpi"] }
+match-queue = { path = "programs-ecs/components/match-queue", features = ["cpi"] }
+world = { path = "../bolt/crates/programs/world", features = ["cpi"] }
 bolt-lang = "0.1.12"
 
 [profile.release]

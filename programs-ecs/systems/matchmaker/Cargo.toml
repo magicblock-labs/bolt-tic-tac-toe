@@ -1,0 +1,25 @@
+[package]
+name = "matchmaker"
+version = "0.1.12"
+description = "Created with Bolt"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "matchmaker"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+idl-build = ["bolt-lang/idl-build"]
+anchor-debug = ["bolt-lang/anchor-debug"]
+custom-heap = []
+custom-panic = []
+
+[dependencies]
+bolt-lang.workspace = true
+match-queue.workspace = true
+serde = { version = "1.0", features = ["derive"] }

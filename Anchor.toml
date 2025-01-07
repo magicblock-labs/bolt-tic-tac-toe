@@ -7,6 +7,9 @@ skip-lint = false
 [programs.localnet]
 grid = "9EoKMqQqrgRAxVED34q17e466RKme5sTUkuCqUGH4bij"
 join-game = "7TsTc97MB21EKbh2RetcWsGWRJ4xuMkPKKD4DcMJ2Sms"
+match-initializer = "3gXs1mELhy5hb8w1QYCLEe1bFpkxu4MAcUVZcPonr2JJ"
+match-queue = "DRfvXQiMMKYm29bWUH71Gznw31QjqhD7SJUqfEjeCsQQ"
+matchmaker = "DTyVdseiJgcLeX1JNWBKf2cjfk6TuGkkiiUd8hFF64dZ"
 play = "EFLfG5icLgcUYwuSnuScoYptcrgh8WYLHx33M4wvTPFv"
 players = "HLzXXTbMUjemRSQr5LHjtZgBvqyieuhY8wE29xYzhZSX"
 
@@ -14,14 +17,19 @@ players = "HLzXXTbMUjemRSQr5LHjtZgBvqyieuhY8wE29xYzhZSX"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "Localnet"
 wallet = "~/.config/solana/id.json"
 
 [workspace]
 members = ["programs-ecs/components/*", "programs-ecs/systems/*"]
 
 [scripts]
-test = "sleep 5 && yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+test = """
+echo \"Waiting validator to start\"
+sleep 5
+echo \"Running tests\"
+yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts
+"""
 
 [test]
 startup_wait = 5000

@@ -6,6 +6,7 @@ import {
     AddEntity,
     ApplySystem,
     FindComponentPda,
+    FindEntityPda,
     FindWorldPda,
     InitializeComponent,
     anchor,
@@ -19,15 +20,17 @@ import {BN, Program, Provider} from "@coral-xyz/anchor";
 import {SimpleProvider} from "./components/Wallet";
 import Active from "./components/Active";
 
-const WORLD_INSTANCE_ID = 1721;
+const WORLD_INSTANCE_ID = 2;
 
 // Components
 const GRID_COMPONENT = new PublicKey("9EoKMqQqrgRAxVED34q17e466RKme5sTUkuCqUGH4bij");
 const PLAYERS_COMPONENT = new PublicKey("HLzXXTbMUjemRSQr5LHjtZgBvqyieuhY8wE29xYzhZSX");
+const MATCH_QUEUE_COMPONENT = new PublicKey("DRfvXQiMMKYm29bWUH71Gznw31QjqhD7SJUqfEjeCsQQ");
 
 // Systems
 const JOIN_GAME = new PublicKey("7TsTc97MB21EKbh2RetcWsGWRJ4xuMkPKKD4DcMJ2Sms");
 const PLAY = new PublicKey("EFLfG5icLgcUYwuSnuScoYptcrgh8WYLHx33M4wvTPFv");
+const MATCHMAKER = new PublicKey("DTyVdseiJgcLeX1JNWBKf2cjfk6TuGkkiiUd8hFF64dZ");
 
 const App: React.FC = () => {
     let { connection } = useConnection();
@@ -43,15 +46,18 @@ const App: React.FC = () => {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [transactionError, setTransactionError] = useState<string | null>(null);
     const [transactionSuccess, setTransactionSuccess] = useState<string | null>(null);
+    const [gameScreen, setGameScreen] = useState<"select" | "join" | "quick" | "new">("select");
     let entityMatch = useRef<PublicKey | null>(null);
+    let entityTicket = useRef<PublicKey | null>(null);
     let gameId = useRef<PublicKey | null>(null);
+    let matchQueueComponentSubscriptionId = useRef<number | null>(null);
     let playersComponentSubscriptionId = useRef<number | null>(null);
     let gridComponentSubscriptionId= useRef<number | null>(null);
 
     // Use useRef for persisting values without causing re-renders
     const playersComponentClient = useRef<Program | null>(null);
     const gridComponentClient = useRef<Program | null>(null);
-
+    const matchQueueComponentClient = useRef<Program | null>(null);
     // Helpers to Dynamically fetch the IDL and initialize the components clients
     const getComponentsClient = useCallback(async (component: PublicKey): Promise<Program> => {
         const idl = await Program.fetchIdl(component, provider.current);
@@ -65,6 +71,7 @@ const App: React.FC = () => {
         const initializeComponents = async () => {
             playersComponentClient.current = await getComponentsClient(PLAYERS_COMPONENT);
             gridComponentClient.current = await getComponentsClient(GRID_COMPONENT);
+            matchQueueComponentClient.current = await getComponentsClient(MATCH_QUEUE_COMPONENT);
         };
         initializeComponents().catch(console.error);
     }, [connection, getComponentsClient]);
@@ -109,6 +116,7 @@ const App: React.FC = () => {
         }
     }, [squares] );
 
+
     const updatePlayersComponent = useCallback((players: any) => {
         console.log("Updating players component", players);
         players.players[0] !== null ? setP1(true) : setP1(false);
@@ -145,6 +153,16 @@ const App: React.FC = () => {
     }, [updateGridComponent]);
 
 
+    // Subscribe to the ticket component
+    const subscribeToQueue = useCallback(async (): Promise<void> => {
+        if (!entityTicket.current) return;
+        console.log("Subscribing to queue", entityTicket.current.toBase58());
+
+        if (matchQueueComponentSubscriptionId && matchQueueComponentSubscriptionId.current) await connection.removeAccountChangeListener(matchQueueComponentSubscriptionId.current);
+        const queueComponent = FindComponentPda({ componentId: MATCH_QUEUE_COMPONENT, entity: entityTicket.current });
+        matchQueueComponentSubscriptionId.current = connection.onAccountChange(queueComponent, handleMatchQueueComponentChange, 'processed');
+    }, [entityTicket]);
+
     // Subscribe to the game state
     const subscribeToGame = useCallback(async (): Promise<void> => {
         if (!entityMatch.current) return;
@@ -171,7 +189,11 @@ const App: React.FC = () => {
         setSquares(Array(9).fill(""));
         setTurn("x");
         setWinner(null);
-        newGameTx().then(() => {});
+        setP1(false);
+        setP2(false);
+        setGameScreen("select");
+        gameId.current = null;
+        entityMatch.current = null;
     };
 
     const updateSquares = (ind: string | number): void => {
@@ -220,6 +242,36 @@ const App: React.FC = () => {
     }, [connection, isSubmitting, sendTransaction]);
 
     /**
+     * Quick game transaction
+     */
+    const quickGameTx = useCallback(async () => {
+        if (!publicKey) throw new WalletNotConnectedError();
+        const worldPda = FindWorldPda({ worldId: new BN(WORLD_INSTANCE_ID) });
+
+        const matchQueueEntity = await FindEntityPda({ worldId: new BN(WORLD_INSTANCE_ID), programId: MATCH_QUEUE_COMPONENT });
+
+        const matchmaker = await ApplySystem({
+            authority: publicKey,
+            systemId: MATCHMAKER,
+            world: worldPda,
+            entities: [
+                {
+                    entity: matchQueueEntity,
+                    components: [{ componentId: MATCH_QUEUE_COMPONENT }]
+                }
+            ]
+        });
+
+        const transaction = matchmaker.transaction;
+
+        const signature = await submitTransaction(transaction);
+        console.log("Signature", signature);
+        if (signature != null) {
+            await subscribeToQueue();
+        }
+    }, [publicKey, connection, subscribeToQueue, submitTransaction]);
+
+    /**
      * Create a new game transaction
      */
     const newGameTx = useCallback(async () => {
@@ -227,26 +279,26 @@ const App: React.FC = () => {
         const worldPda = FindWorldPda({ worldId: new BN(WORLD_INSTANCE_ID) });
      
         // Create the entity
-        const addEntity = await AddEntity({
+        const matchEntity = await AddEntity({
             payer: publicKey,
             world: worldPda,
             connection: connection,
         });
-        const transaction = addEntity.transaction;
-        entityMatch.current = addEntity.entityPda;
-        gameId.current = addEntity.entityPda;
+        const transaction = matchEntity.transaction;
+        entityMatch.current = matchEntity.entityPda;
+        gameId.current = matchEntity.entityPda;
 
         // Initialize the grid component
         const initGridIx = (await InitializeComponent({
             payer: publicKey,
-            entity: entityMatch.current,
+            entity: matchEntity.entityPda,
             componentId: GRID_COMPONENT,
         })).instruction;
 
         // Initialize the player component
         const initPlayersIx = (await InitializeComponent({
             payer: publicKey,
-            entity: addEntity.entityPda,
+            entity: matchEntity.entityPda,
             componentId: PLAYERS_COMPONENT,
         })).instruction;
 
@@ -257,7 +309,7 @@ const App: React.FC = () => {
             world: worldPda,
             entities: [
                 {
-                    entity: addEntity.entityPda,
+                    entity: matchEntity.entityPda,
                     components: [{ componentId: PLAYERS_COMPONENT }]
                 }
             ]
@@ -274,12 +326,24 @@ const App: React.FC = () => {
         }
     }, [publicKey, connection, submitTransaction, subscribeToGame]);
 
+
+    /**
+     * Cancel quick game
+     */
+    const cancelQuickGame = () => {
+        setGameScreen("select");
+        resetGame();
+    };
+
     /**
      * Create a new join game transaction
      */
     const joinGameTx = useCallback(async () => {
         if (!publicKey) throw new WalletNotConnectedError();
-        if (gameId.current == null) setTransactionError("Enter a game ID");
+        if (gameId.current == null) {
+            setTransactionError("Enter a game ID");
+            return;
+        }
         const entity = gameId.current as PublicKey;
         const worldPda = FindWorldPda({ worldId: new BN(WORLD_INSTANCE_ID) });
 
@@ -302,6 +366,28 @@ const App: React.FC = () => {
         }
     }, [publicKey, submitTransaction, subscribeToGame]);
 
+    /**
+     * Update the match ticket component
+     */
+    const updateMatchQueueComponent = useCallback((queue: any) => {
+        console.log("Updating match queue component", queue);
+        if (queue.match_id !== null) {
+            // setTransactionSuccess("Match found");
+            // gameId.current = ticket.match_id;
+            // joinGameTx();
+        }
+    }, [joinGameTx]);
+
+
+    const handleMatchQueueComponentChange = useCallback((accountInfo: AccountInfo<Buffer>) => {
+        const parsedData = matchQueueComponentClient.current?.coder.accounts.decode("match_queue", accountInfo.data);
+        updateMatchQueueComponent(parsedData);
+    }, [updateMatchQueueComponent]);
+
+    /**
+     * Check if game has started
+     */
+    const gameStarted = p1 && p2;
     /**
      * Play transaction
      */
@@ -344,34 +430,104 @@ const App: React.FC = () => {
 
             <h1> TIC-TAC-TOE </h1>
 
-            <Button title={"New Game"} resetGame={newGameTx} />
-            <div className="join-game">
-                <input
-                    type="text"
-                    placeholder="Enter Game ID"
-                    value={gameId.current?.toBase58()}
-                    onChange={handleGameIdChange}
-                />
-                <Button title={"Join"} resetGame={joinGameTx} />
-            </div>
-            <div className="game">
-                {Array.from("012345678").map((ind) => (
-                    <Square
-                        key={ind}
-                        ind={ind}
-                        updateSquares={updateSquares}
-                        clsName={squares[parseInt(ind, 10)]}
-                    />
-                ))}
-            </div>
-            <div className={`turn ${turn === "x" ? "left" : "right"}`}>
-                <Square clsName="x" />
-                <Square clsName="o" />
-            </div>
-            <div className={"active-div"}>
-                <Active clsName={`${p1 ? "on" : "off"}`} />
-                <Active clsName={`${p2 ? "on" : "off"}`} />
-            </div>
+            {!gameStarted && gameScreen === "new" && (
+                <div>
+                    <Button title={"Go Back"} onClick={() => setGameScreen("select")} />
+                    {gameId.current && (
+                        <div className="game-id-container border">
+                            <Button title={gameId.current.toBase58()} className="game-id pulsate" onClick={() => {
+                                if (gameId.current) {
+                                    navigator.clipboard.writeText(gameId.current.toBase58());
+                                    setTransactionSuccess("Copied to clipboard");
+                                } else {
+                                    setTransactionError("No game ID");
+                                }
+                            }} />
+                            <p>Share this ID with your opponent to join the game</p>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {!gameStarted && gameScreen === "select" && (
+                <div>
+                    <Button title={"Quick Game"} onClick={() => {
+                        setGameScreen("quick");
+                        quickGameTx();
+                    }} />
+                    <Button title={"New Game"} onClick={() => {
+                        setGameScreen("new");
+                        newGameTx();
+                    }} />
+                    <Button title={"Join Game"} onClick={() => setGameScreen("join")} />
+                </div>
+            )}
+
+            {!gameStarted && gameScreen === "join" && (
+                <div className="custom-game">
+                    <Button title={"Go Back"} onClick={() => setGameScreen("select")} />
+                    <div className="join-game">
+                        <input
+                            type="text"
+                            placeholder="Enter Custom Game ID"
+                            value={gameId.current?.toBase58()}
+                            onChange={handleGameIdChange}
+                        />
+                        <Button title={"Join Game"} onClick={joinGameTx} />
+                    </div>
+                </div>
+            )}
+
+            {!gameStarted && gameScreen === "quick" && (
+                <div>
+                    <Button title={"Go Back"} onClick={() => cancelQuickGame()} />
+                    <div className="loading">
+                        <motion.div
+                            animate={{
+                                rotate: 360
+                            }}
+                            transition={{
+                                duration: 1,
+                                repeat: Infinity,
+                                ease: "linear"
+                            }}
+                            style={{
+                                width: "50px",
+                                height: "50px",
+                                border: "5px solid #eee",
+                                borderTop: "5px solid transparent",
+                                borderRadius: "50%",
+                                margin: "20px auto"
+                            }}
+                        />
+                        <p style={{ color: "#eee" }}>Finding opponent...</p>
+                    </div>
+                </div>
+            )}
+
+            {gameStarted && (
+                <>
+                    <div className="game">
+                        {Array.from("012345678").map((ind) => (
+                            <Square
+                                key={ind}
+                                ind={ind}
+                                updateSquares={updateSquares}
+                                clsName={squares[parseInt(ind, 10)]}
+                            />
+                        ))}
+                    </div>
+                    <div className={`turn ${turn === "x" ? "left" : "right"}`}>
+                        <Square clsName="x" />
+                        <Square clsName="o" />
+                    </div>
+                    <div className={"active-div"}>
+                        <Active clsName={`${p1 ? "on" : "off"}`} />
+                        <Active clsName={`${p2 ? "on" : "off"}`} />
+                    </div>
+                </>
+            )}
+
             <AnimatePresence>
                 {winner && (
                     <motion.div
@@ -432,7 +588,7 @@ const App: React.FC = () => {
                                     transition: { delay: 1.5, duration: 0.3 },
                                 }}
                             >
-                                <Button title={"New Game"} resetGame={resetGame} />
+                                <Button title={"Reset Game"} onClick={resetGame} />
                             </motion.div>
                         </motion.div>
                     </motion.div>
