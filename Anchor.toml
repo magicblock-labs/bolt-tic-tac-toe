@@ -18,13 +18,16 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [workspace]
-members = ["programs-ecs/components/*", "programs-ecs/systems/*"]
+members = [
+    "programs-ecs/components/*",
+    "programs-ecs/systems/*"
+]
 
 [scripts]
 test = "sleep 5 && yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
 
 [test]
-startup_wait = 5000
+startup_wait = 10000
 shutdown_wait = 2000
 upgradeable = false
 
@@ -38,7 +41,3 @@ bind_address = "0.0.0.0"
 url = "https://rpc.magicblock.app/devnet/"
 ledger = ".bolt/test-ledger"
 rpc_port = 8899
-
-[[test.validator.account]]
-address = "EHLkWwAT9oebVv9ht3mtqrvHhRVMKrt54tF3MfHTey2K"
-filename = "tests/fixtures/registry.json"

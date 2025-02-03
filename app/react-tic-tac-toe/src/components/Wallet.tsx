@@ -5,8 +5,8 @@ import {
     WalletModalProvider,
 } from '@solana/wallet-adapter-react-ui';
 import {clusterApiUrl, Connection, PublicKey} from '@solana/web3.js';
-import {PhantomWalletAdapter, SolflareWalletAdapter} from "@solana/wallet-adapter-wallets";
 import {Provider} from "@coral-xyz/anchor";
+import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 
 // Default styles that can be overridden by your app
 require('@solana/wallet-adapter-react-ui/styles.css');
@@ -26,17 +26,19 @@ export class SimpleProvider implements Provider {
 }
 
 export const Wallet: FC<WalletProps> = ({ app }) => {
-    const network = WalletAdapterNetwork.Devnet;
-    const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+    // const network = WalletAdapterNetwork.Devnet;
+    // const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+    let endpoint = "http://localhost:8899";
 
     const wallets = useMemo(() => [
         new PhantomWalletAdapter(),
-        new SolflareWalletAdapter(),
     ], []);
 
     return (
         <ConnectionProvider endpoint={endpoint}>
-            <WalletProvider wallets={wallets} autoConnect>
+            <WalletProvider wallets={wallets} autoConnect onError={(error, adapter) => {
+                console.log("Error", error);
+            }}> 
                 <WalletModalProvider>
                     {app}
                 </WalletModalProvider>
