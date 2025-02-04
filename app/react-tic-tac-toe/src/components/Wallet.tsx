@@ -26,9 +26,8 @@ export class SimpleProvider implements Provider {
 }
 
 export const Wallet: FC<WalletProps> = ({ app }) => {
-    // const network = WalletAdapterNetwork.Devnet;
-    // const endpoint = useMemo(() => clusterApiUrl(network), [network]);
-    let endpoint = "http://localhost:8899";
+    const network = WalletAdapterNetwork.Devnet;
+    const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
     const wallets = useMemo(() => [
         new PhantomWalletAdapter(),

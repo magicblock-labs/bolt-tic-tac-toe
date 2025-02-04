@@ -10,7 +10,10 @@ import {
     ApplySystem,
     Program,
     anchor,
-    InitializeRegistry
+    InitializeRegistry,
+    CreateSession,
+    BN,
+    Session
 } from "../../bolt/clients/bolt-sdk/lib"
 import {assert, expect} from "chai";
 
@@ -24,6 +27,8 @@ describe("tic-tac-toe", () => {
 
   let player1: PublicKey = provider.wallet.publicKey;
   let player2: Keypair = Keypair.generate();
+
+  let session: Session;
 
   const gridComponent = anchor.workspace.Grid as Program<Grid>;
   const playersComponent = anchor.workspace.Players as Program<Players>;
@@ -80,17 +85,27 @@ describe("tic-tac-toe", () => {
     await provider.sendAndConfirm(initializeComponent.transaction);
   });
 
+  it("Create a session", async () => {
+    const createSession = await CreateSession({
+      authority: provider.wallet.publicKey,
+      topUp: new BN(100000000)
+    });
+    session = createSession.session;
+    await provider.sendAndConfirm(createSession.transaction, [session.signer]);
+  });
+
   it("Join the game", async () => {
     const joinGame = await ApplySystem({
       authority: provider.wallet.publicKey,
       systemId: joinGameSystem.programId,
       world: worldPda,
+      session,
       entities: [{
         entity: matchEntityPda,
         components: [{ componentId: playersComponent.programId }]
-      }]
+      }],
     });
-    await provider.sendAndConfirm(joinGame.transaction);
+    await provider.connection.sendTransaction(joinGame.transaction, [session.signer]);
   });
   it("Player 2 joins the game", async () => {
     const joinGame = await ApplySystem({
@@ -109,6 +124,7 @@ describe("tic-tac-toe", () => {
       authority: provider.wallet.publicKey,
       systemId: playSystem.programId,
       world: worldPda,
+      session,
       entities: [{
         entity: matchEntityPda,
         components: [{ componentId: gridComponent.programId }, { componentId: playersComponent.programId }]
@@ -118,7 +134,7 @@ describe("tic-tac-toe", () => {
         column: 0
       }
     });
-    await provider.sendAndConfirm(play.transaction);
+    await provider.sendAndConfirm(play.transaction, [session.signer]);
   });
   it("Player 2 makes an invalid move", async () => {
     const play = await ApplySystem({
