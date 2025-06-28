@@ -5,21 +5,23 @@ import Square from "./components/Square";
 import {
     AddEntity,
     ApplySystem,
+    CreateSession,
     FindComponentPda,
     FindWorldPda,
     InitializeComponent,
+    Session,
     anchor,
 } from "@magicblock-labs/bolt-sdk";
 import {WalletNotConnectedError} from '@solana/wallet-adapter-base';
 import {useConnection, useWallet} from '@solana/wallet-adapter-react';
 import {WalletMultiButton} from "@solana/wallet-adapter-react-ui";
 import Alert from "./components/Alert";
-import {AccountInfo, PublicKey, Transaction} from "@solana/web3.js";
+import {AccountInfo, Keypair, PublicKey, Signer, Transaction} from "@solana/web3.js";
 import {BN, Program, Provider} from "@coral-xyz/anchor";
 import {SimpleProvider} from "./components/Wallet";
 import Active from "./components/Active";
 
-const WORLD_INSTANCE_ID = 1721;
+const WORLD_INSTANCE_ID = 1;
 
 // Components
 const GRID_COMPONENT = new PublicKey("9EoKMqQqrgRAxVED34q17e466RKme5sTUkuCqUGH4bij");
@@ -33,7 +35,7 @@ const App: React.FC = () => {
     let { connection } = useConnection();
     const provider = useRef<Provider>(new SimpleProvider(connection));
     anchor.setProvider(provider.current);
-    const { publicKey, sendTransaction } = useWallet();
+    const { publicKey, sendTransaction, signTransaction } = useWallet();
     const [squares, setSquares] = useState<string[]>(Array(9).fill(""));
     const [turn, setTurn] = useState<"x" | "o">("x");
     const [p1, setP1] = useState<boolean>(false);
@@ -43,6 +45,7 @@ const App: React.FC = () => {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [transactionError, setTransactionError] = useState<string | null>(null);
     const [transactionSuccess, setTransactionSuccess] = useState<string | null>(null);
+    let session = useRef<Session | null>(null);
     let entityMatch = useRef<PublicKey | null>(null);
     let gameId = useRef<PublicKey | null>(null);
     let playersComponentSubscriptionId = useRef<number | null>(null);
@@ -203,12 +206,17 @@ const App: React.FC = () => {
                 context: { slot: minContextSlot },
                 value: { blockhash, lastValidBlockHeight }
             } = await connection.getLatestBlockhashAndContext();
-            const signature = await sendTransaction(transaction, connection, { minContextSlot});
-            console.log("Signature", signature);
+            let signature = null;
+
+            if (session.current) {
+                signature = await connection.sendTransaction(transaction, [session.current.signer as Signer], {minContextSlot});
+            } else {
+                signature = await sendTransaction(transaction, connection, { minContextSlot })
+            }
+            
             await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature }, "processed");
 
             // Transaction was successful
-            console.log(`Transaction confirmed: ${signature}`);
             setTransactionSuccess(`Transaction confirmed`);
             return signature;
         } catch (error) {
@@ -217,36 +225,66 @@ const App: React.FC = () => {
             setIsSubmitting(false);
         }
         return null;
-    }, [connection, isSubmitting, sendTransaction]);
+    }, [connection, isSubmitting, sendTransaction, signTransaction]);
+
+    async function createSession() {
+        const create_session = await CreateSession({
+            authority: publicKey as PublicKey,
+            topUp: new BN(100000000)
+        });
+        const blockhash = await connection.getLatestBlockhash();
+        create_session.transaction.recentBlockhash = blockhash.blockhash;
+        try {
+            create_session.transaction.feePayer = publicKey as PublicKey;
+            create_session.transaction.partialSign(create_session.session.signer as Signer);
+        } catch (error) {
+            console.log("Failed to sign transaction", error);
+        }
+
+        const signature = await submitTransaction(create_session.transaction);
+        session.current = create_session.session;
+        if (signature == null) {
+            throw new Error("Failed to create session");
+        }
+    }
 
     /**
      * Create a new game transaction
      */
     const newGameTx = useCallback(async () => {
         if (!publicKey) throw new WalletNotConnectedError();
+    
+        try {	
+            await createSession();
+        } catch (error) {
+            setTransactionError(`Failed to create session: ${error}`);
+            return;
+        }
+
         const worldPda = FindWorldPda({ worldId: new BN(WORLD_INSTANCE_ID) });
      
         // Create the entity
         const addEntity = await AddEntity({
-            payer: publicKey,
+            payer: session.current?.signer.publicKey as PublicKey,
             world: worldPda,
             connection: connection,
         });
         const transaction = addEntity.transaction;
+        
         entityMatch.current = addEntity.entityPda;
         gameId.current = addEntity.entityPda;
 
         // Initialize the grid component
         const initGridIx = (await InitializeComponent({
-            payer: publicKey,
+            payer: session.current?.signer.publicKey as PublicKey,
             entity: entityMatch.current,
             componentId: GRID_COMPONENT,
         })).instruction;
 
         // Initialize the player component
         const initPlayersIx = (await InitializeComponent({
-            payer: publicKey,
-            entity: addEntity.entityPda,
+            payer: session.current?.signer.publicKey as PublicKey,
+            entity: entityMatch.current,
             componentId: PLAYERS_COMPONENT,
         })).instruction;
 
@@ -255,12 +293,13 @@ const App: React.FC = () => {
             authority: publicKey,
             systemId: JOIN_GAME,
             world: worldPda,
+            session: session.current as Session,
             entities: [
                 {
-                    entity: addEntity.entityPda,
+                    entity: entityMatch.current,
                     components: [{ componentId: PLAYERS_COMPONENT }]
                 }
-            ]
+            ],
         })).instruction;
 
         transaction.add(initGridIx);
@@ -280,6 +319,14 @@ const App: React.FC = () => {
     const joinGameTx = useCallback(async () => {
         if (!publicKey) throw new WalletNotConnectedError();
         if (gameId.current == null) setTransactionError("Enter a game ID");
+
+        try {
+            await createSession();
+        } catch (error) {
+            setTransactionError(`Failed to create session: ${error}`);
+            return;
+        }
+        
         const entity = gameId.current as PublicKey;
         const worldPda = FindWorldPda({ worldId: new BN(WORLD_INSTANCE_ID) });
 
@@ -287,6 +334,7 @@ const App: React.FC = () => {
             authority: publicKey,
             systemId: JOIN_GAME,
             world: worldPda,
+            session: session.current as Session,
             entities: [
                 {
                     entity,
@@ -300,7 +348,7 @@ const App: React.FC = () => {
         if (signature != null) {
             await subscribeToGame();
         }
-    }, [publicKey, submitTransaction, subscribeToGame]);
+    }, [publicKey, submitTransaction, subscribeToGame, session]);
 
     /**
      * Play transaction
@@ -320,6 +368,7 @@ const App: React.FC = () => {
             authority: publicKey,
             systemId: PLAY,
             world: worldPda,
+            session: session.current as Session,
             entities: [
                 {
                     entity: entityMatch.current,
@@ -334,7 +383,7 @@ const App: React.FC = () => {
 
         const transaction = makeMove.transaction;
         await submitTransaction(transaction);
-    }, [publicKey, entityMatch, submitTransaction]);
+    }, [publicKey, entityMatch, submitTransaction, session]);
 
     return (
         <div className="tic-tac-toe">

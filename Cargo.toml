@@ -8,7 +8,8 @@ resolver = "2"
 [workspace.dependencies]
 players = { path = "programs-ecs/components/players", features = ["cpi"] }
 grid = { path = "programs-ecs/components/grid", features = ["cpi"] }
-bolt-lang = "0.1.11"
+# bolt-lang = "0.1.11"
+bolt-lang = { path = "../bolt/crates/bolt-lang"}
 anchor-lang = "0.30.1"
 
 [profile.release]
